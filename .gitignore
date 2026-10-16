@@ -1,4 +1,4 @@
-"# Python und Jupyter: automatisch erzeugte Dateien
+# Python und Jupyter: automatisch erzeugte Dateien
 __pycache__/
 *.py[cod]
 .ipynb_checkpoints/
@@ -37,4 +37,4 @@ dist/
 !/data/telco/WA_Fn-UseC_-Telco-Customer-Churn.csv
 /data/rossmann/*
 !/data/rossmann/train_filtered.csv
-!/data/rossmann/forecasts.csv"
+!/data/rossmann/forecasts.csv

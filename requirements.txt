@@ -7,3 +7,4 @@ jupyter
 prophet
 streamlit>=1.50
 plotly
+python 3.12

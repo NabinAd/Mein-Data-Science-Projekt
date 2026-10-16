@@ -37,8 +37,9 @@ Datenquellen: [Telco Customer Churn](https://www.kaggle.com/datasets/blastchar/t
 
 Aus Datenschutz- und Lizenzgründen habe ich die Originaldatensätze nicht in dieses Repository hochgeladen. Sie können über die oben angegebenen Links heruntergeladen werden. Legen Sie die heruntergeladenen Dateien anschließend entsprechend ihrer Datenquelle in einem der folgenden Projektordner ab:
 
-WA_Fn-UseC_-Telco-Customer-Churn.csv (Telco-Datensatz) : data/telco/
-train.csv (Rossmann-Datensatz): data/rossmann/
+### WA_Fn-UseC_-Telco-Customer-Churn.csv (Telco-Datensatz) : data/telco/
+
+### train.csv (Rossmann-Datensatz): data/rossmann/
 
 Die mitgelieferten Dateien erlauben das Nachvollziehen der Analyse. Es sind historische Beispieldaten: Die Prognose beginnt nach dem letzten Datenstand von 2015, nicht am heutigen Datum. Die Umsatzachse ist im Projekt als Euro beschriftet; eine verifizierte Währungsangabe ist in den lokalen CSV-Dateien nicht enthalten.
 

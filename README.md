@@ -31,8 +31,14 @@ Die im Terminal angezeigte lokale Adresse öffnen, normalerweise `http://localho
 | `data/telco/WA_Fn-UseC_-Telco-Customer-Churn.csv` | 7.043 Kunden, 21 Spalten; 1.869 Kündigungen (26,54 %) |
 | `data/rossmann/train_filtered.csv` | 2.826 Tagesdatensätze für Stores 1, 2 und 3, vom 01.01.2013 bis 31.07.2015 |
 | `data/rossmann/forecasts.csv` | Gespeicherter Prophet-Export mit 2.434 Zeilen inklusive historischer Modellwerte und Zukunftsprognosen |
+| `data/rossmann/train.csv` | 1017210  Datensätze von Rossmann |
 
 Datenquellen: [Telco Customer Churn](https://www.kaggle.com/datasets/blastchar/telco-customer-churn) und [Rossmann Store Sales](https://www.kaggle.com/competitions/rossmann-store-sales/data). Die Daten stammen aus externen Quellen; deren Nutzungsbedingungen gelten unabhängig vom Projektcode. Eine Erlaubnis zur Weiterveröffentlichung wird durch diese README nicht erteilt. Die Bedingungen für die öffentliche Bereitstellung der CSV-Dateien sollten vor der Abgabe geprüft werden.
+
+Aus Datenschutz- und Lizenzgründen habe ich die Originaldatensätze nicht in dieses Repository hochgeladen. Sie können über die oben angegebenen Links heruntergeladen werden. Legen Sie die heruntergeladenen Dateien anschließend entsprechend ihrer Datenquelle in einem der folgenden Projektordner ab:
+
+WA_Fn-UseC_-Telco-Customer-Churn.csv (Telco-Datensatz) : data/telco/
+train.csv (Rossmann-Datensatz): data/rossmann/
 
 Die mitgelieferten Dateien erlauben das Nachvollziehen der Analyse. Es sind historische Beispieldaten: Die Prognose beginnt nach dem letzten Datenstand von 2015, nicht am heutigen Datum. Die Umsatzachse ist im Projekt als Euro beschriftet; eine verifizierte Währungsangabe ist in den lokalen CSV-Dateien nicht enthalten.
 

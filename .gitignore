@@ -1,40 +1,5 @@
-# Python und Jupyter: automatisch erzeugte Dateien
-__pycache__/
-*.py[cod]
+data/
 .ipynb_checkpoints/
-.pytest_cache/
-.mypy_cache/
-.ruff_cache/
-
-# Lokale Python-Umgebungen
-.venv/
+__pycache__/
 venv/
-env/
-
-# Zugangsdaten und lokale Einstellungen
-.env
-.env.*
-!.env.example
-.streamlit/secrets.toml
-.vscode/
-.idea/
-
-# Betriebssystem und Build-Ausgaben
-.DS_Store
-Thumbs.db
-Desktop.ini
-*.winmd
-build/
-dist/
-*.egg-info/
-
-# Nur die drei fuer die Abgabe vorgesehenen CSV-Dateien versionieren.
-# Die grosse Rossmann-Originaldatei train.csv bleibt lokal.
-/data/*
-!/data/telco/
-!/data/rossmann/
-/data/telco/*
-!/data/telco/WA_Fn-UseC_-Telco-Customer-Churn.csv
-/data/rossmann/*
-!/data/rossmann/train_filtered.csv
-!/data/rossmann/forecasts.csv
+.env 

@@ -35,11 +35,7 @@ Die im Terminal angezeigte lokale Adresse öffnen, normalerweise `http://localho
 
 Datenquellen: [Telco Customer Churn](https://www.kaggle.com/datasets/blastchar/telco-customer-churn) und [Rossmann Store Sales](https://www.kaggle.com/competitions/rossmann-store-sales/data). Die Daten stammen aus externen Quellen; deren Nutzungsbedingungen gelten unabhängig vom Projektcode. Eine Erlaubnis zur Weiterveröffentlichung wird durch diese README nicht erteilt. Die Bedingungen für die öffentliche Bereitstellung der CSV-Dateien sollten vor der Abgabe geprüft werden.
 
-Aus Datenschutz- und Lizenzgründen habe ich die Originaldatensätze nicht in dieses Repository hochgeladen. Sie können über die oben angegebenen Links heruntergeladen werden. Legen Sie die heruntergeladenen Dateien anschließend entsprechend ihrer Datenquelle in einem der folgenden Projektordner ab:
-
-### WA_Fn-UseC_-Telco-Customer-Churn.csv (Telco-Datensatz) : data/telco/
-
-### train.csv (Rossmann-Datensatz): data/rossmann/
+Die Datensätze sind im Repository enthalten: Der Telco-Datensatz liegt unter `data/telco/`, die Rossmann-Originaldatei `train.csv`, der gefilterte Datensatz und die Prognosen liegen unter `data/rossmann/`.
 
 Die mitgelieferten Dateien erlauben das Nachvollziehen der Analyse. Es sind historische Beispieldaten: Die Prognose beginnt nach dem letzten Datenstand von 2015, nicht am heutigen Datum. Die Umsatzachse ist im Projekt als Euro beschriftet; eine verifizierte Währungsangabe ist in den lokalen CSV-Dateien nicht enthalten.
 
@@ -54,7 +50,7 @@ Erste_Diagramm_erstellen.ipynb       Datenüberblick und Diagramme
 Chrun_prediction.ipynb              Churn-Modelle und Vergleich
 forecasting_mit_Prophet.ipynb        Prophet, zeitlicher Test und CSV-Export
 data/telco/                         Telco-Eingabedaten
-data/rossmann/                      Gefilterte Umsatzdaten und Prognoseexport
+data/rossmann/                      Rossmann-Originaldaten, gefilterte Umsatzdaten und Prognoseexport
 .streamlit/config.toml              Darstellung des Dashboards
 requirements.txt                   Python-Abhängigkeiten
 ```
@@ -65,7 +61,7 @@ Die vier PNG-Dateien im Hauptordner zeigen die Churn-Verteilung, Kündigungen na
 
 Unter Windows Jupyter mit `.venv\Scripts\python.exe -m notebook` starten, unter macOS/Linux mit `.venv/bin/python -m notebook`.
 
-1. Optional `01_daten_vorbereitung.ipynb`: benötigt zusätzlich die Rossmann-Originaldatei unter `data/rossmann/train.csv`. Diese ist nicht enthalten. Mit dem mitgelieferten gefilterten Datensatz kann dieser Schritt übersprungen werden.
+1. Optional `01_daten_vorbereitung.ipynb`: verwendet die im Repository enthaltene Rossmann-Originaldatei unter `data/rossmann/train.csv`. Mit dem mitgelieferten gefilterten Datensatz kann dieser Schritt übersprungen werden.
 2. `Erste_Diagramm_erstellen.ipynb`: Datenüberblick und vier Diagramme.
 3. `Chrun_prediction.ipynb`: logistische Regression, Random Forest und Modellvergleich.
 4. `forecasting_mit_Prophet.ipynb`: Prognose, Validierung für Store 1 und Export für alle drei Stores.

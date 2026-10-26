@@ -1,5 +1,27 @@
-data/
-.ipynb_checkpoints/
-__pycache__/
+# Lokale Umgebungen und generierte Dateien
+.venv/
 venv/
-.env 
+env/
+__pycache__/
+*.py[cod]
+.ipynb_checkpoints/
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+build/
+dist/
+*.egg-info/
+*.winmd
+
+# Zugangsdaten und persönliche Einstellungen
+.env
+.env.*
+!.env.example
+.streamlit/secrets.toml
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Die dokumentierten Beispieldaten bleiben ausdrücklich versioniert.

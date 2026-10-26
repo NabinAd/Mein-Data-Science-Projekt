@@ -1,18 +1,50 @@
-# Customer Churn und Umsatzprognose
+# Customer Churn & Sales Forecast
 
-Data-Science-Projekt mit zwei Anwendungsfällen: Kündigungen bei Telekommunikationskunden analysieren und Tagesumsätze von drei Rossmann-Filialen prognostizieren. Die Arbeit umfasst Datenaufbereitung, explorative Analysen, Modellvergleich und ein interaktives Streamlit-Dashboard.
+**Python-Anwendung mit interaktivem Dashboard:** Kündigungsmuster von Telekommunikationskunden analysieren und historische Tagesumsätze von drei Rossmann-Filialen prognostizieren.
 
-## Schnellstart für die Prüfung
+[![Python quality](https://github.com/NabinAd/Mein-Data-Science-Projekt/actions/workflows/quality.yml/badge.svg)](https://github.com/NabinAd/Mein-Data-Science-Projekt/actions/workflows/quality.yml)
 
-Voraussetzung: **Python 3.12**. Alle Befehle im Projektordner ausführen.
+Das Lernprojekt verbindet Datenaufbereitung, Machine Learning und eine bedienbare Oberfläche. Es demonstriert zwei Fragestellungen: Welche Kundenmerkmale hängen mit Kündigungen zusammen? Welche Umsatzmuster lassen sich aus vergangenen Verkaufstagen ableiten? Ein betrieblicher Einsatz oder finanzieller Nutzen wurde nicht nachgewiesen.
+
+## Einblick in die Anwendung
+
+![Customer-Churn-Dashboard mit Kennzahlen und interaktiven Diagrammen](docs/images/dashboard-churn.png)
+
+![Rossmann-Dashboard mit Filialauswahl und historischer Umsatzprognose](docs/images/dashboard-forecast.png)
+
+## Funktionen
+
+- **Customer Churn:** Übersicht über 7.043 Kunden, Auswahl einzelner Testkunden, Modell-Scores, Confusion Matrix und Koeffizienten.
+- **Modellvergleich:** Logistische Regression und Random Forest im Notebook; einheitliche Vorverarbeitung und derselbe stratifizierte 80/20-Split.
+- **Umsatzprognose:** Prophet für Filialen 1–3 mit 7 bis 60 Kalendertagen Prognosehorizont im Dashboard.
+- **CSV-Export:** Testkunden mit Scores sowie Umsatzprognosen; Semikolon und Dezimalkomma für deutsches Excel.
+- **Qualität:** Eingabevalidierung, pytest-Tests, Streamlit-AppTests, Ruff und GitHub Actions.
+
+## Tech-Stack
+
+| Bereich | Technologien und Konzepte |
+|---|---|
+| Sprache und Daten | Python 3.12, pandas, NumPy, CSV-Validierung |
+| Klassifikation | scikit-learn, Pipeline, ColumnTransformer, Imputation, One-Hot-Encoding, StandardScaler, logistische Regression, Random Forest |
+| Zeitreihen | Prophet, zeitlicher Holdout, Vergleich mit Wochen-Baseline |
+| Oberfläche und Grafiken | Streamlit, Plotly, Matplotlib, Seaborn |
+| Entwicklung | Git, pytest, Ruff, GitHub Actions, Jupyter |
+
+## Lokal starten
+
+Voraussetzung: **Python 3.12**. Die Befehle im Projektordner ausführen.
 
 ```powershell
+git clone https://github.com/NabinAd/Mein-Data-Science-Projekt.git
+cd Mein-Data-Science-Projekt
 py -3.12 -m venv .venv
 .venv\Scripts\python.exe -m pip install -r requirements.txt
 .venv\Scripts\python.exe -m streamlit run app.py
 ```
 
-Unter macOS/Linux mit installiertem Python 3.12:
+Wenn du das Repository bereits lokal hast, beginne mit dem Erstellen der Umgebung. Anschließend die angezeigte Adresse öffnen, normalerweise `http://localhost:8501`.
+
+macOS/Linux:
 
 ```bash
 python3.12 -m venv .venv
@@ -20,91 +52,96 @@ python3.12 -m venv .venv
 .venv/bin/python -m streamlit run app.py
 ```
 
-Die im Terminal angezeigte lokale Adresse öffnen, normalerweise `http://localhost:8501`. Das erste Training kann etwas dauern; weitere Aufrufe werden zwischengespeichert. Die benötigten Eingabedaten liegen bereits im Repository. Die große Rossmann-Datei `train.csv` ist für das Dashboard nicht erforderlich.
+Die erste Berechnung trainiert die Modelle. Streamlit speichert Ergebnisse zwischen, damit Interaktionen nicht jedes Mal dasselbe Training auslösen. Nach Änderungen an CSV-Dateien den Streamlit-Cache leeren oder die Anwendung neu starten.
 
-`requirements.txt` enthält Python-Pakete; Python selbst wird separat installiert. `.python-version` dokumentiert die gewünschte Python-Version. Die direkten Paketversionen sind festgelegt; ein vollständiger Lock aller indirekten Abhängigkeiten ist nicht enthalten.
+### In zwei Minuten ausprobieren
 
-## Daten und Quellen
+1. Auf **Customer Churn** Accuracy, Recall und die Mehrheits-Baseline vergleichen.
+2. Im Tab **Kundenprognose** einen Testkunden auswählen; Modell-Score und tatsächlich beobachtete Kündigung gegenüberstellen.
+3. Im Tab **Modell** Confusion Matrix und positive/negative Koeffizienten ansehen.
+4. In der Seitenleiste **Forecast**, Filiale und Horizont auswählen; Zeitraum ändern und Prognose als CSV herunterladen.
 
-| Datei | Inhalt |
-|---|---|
-| `data/telco/WA_Fn-UseC_-Telco-Customer-Churn.csv` | 7.043 Kunden, 21 Spalten; 1.869 Kündigungen (26,54 %) |
-| `data/rossmann/train_filtered.csv` | 2.826 Tagesdatensätze für Stores 1, 2 und 3, vom 01.01.2013 bis 31.07.2015 |
-| `data/rossmann/forecasts.csv` | Gespeicherter Prophet-Export mit 2.434 Zeilen inklusive historischer Modellwerte und Zukunftsprognosen |
-| `data/rossmann/train.csv` | 1017210  Datensätze von Rossmann |
+Es gibt derzeit keine veröffentlichte Live-Demo.
 
-Datenquellen: [Telco Customer Churn](https://www.kaggle.com/datasets/blastchar/telco-customer-churn) und [Rossmann Store Sales](https://www.kaggle.com/competitions/rossmann-store-sales/data). Die Daten stammen aus externen Quellen; deren Nutzungsbedingungen gelten unabhängig vom Projektcode. Eine Erlaubnis zur Weiterveröffentlichung wird durch diese README nicht erteilt. Die Bedingungen für die öffentliche Bereitstellung der CSV-Dateien sollten vor der Abgabe geprüft werden.
+## Ergebnisse und Einordnung
 
-Die Datensätze sind im Repository enthalten: Der Telco-Datensatz liegt unter `data/telco/`, die Rossmann-Originaldatei `train.csv`, der gefilterte Datensatz und die Prognosen liegen unter `data/rossmann/`.
+Neuberechnung der Churn-Pipeline am **26.10.2026**, Python 3.12 auf Linux, Testset mit **1.409 Kunden**:
 
-Die mitgelieferten Dateien erlauben das Nachvollziehen der Analyse. Es sind historische Beispieldaten: Die Prognose beginnt nach dem letzten Datenstand von 2015, nicht am heutigen Datum. Die Umsatzachse ist im Projekt als Euro beschriftet; eine verifizierte Währungsangabe ist in den lokalen CSV-Dateien nicht enthalten.
+| Kennzahl | Logistische Regression |
+|---|---:|
+| Accuracy | 80,70 % |
+| Precision | 65,84 % |
+| Recall | 56,68 % |
+| F1-Score | 60,92 % |
+| ROC-AUC | 0,8416 |
+| Accuracy der Mehrheits-Baseline | 73,46 % |
+
+Die höhere Accuracy allein genügt nicht: Das Modell erkennt nur rund 57 % der tatsächlichen Kündiger. Die Vorverarbeitung wird ausschließlich auf Trainingsdaten gelernt. Die Scores sind nicht nachweislich kalibriert; die Daten definieren keinen konkreten Zeitraum bis zu einer zukünftigen Kündigung.
+
+Das [Forecast-Notebook](notebooks/04_sales_forecasting.ipynb) hält die letzten 30 Kalendertage von Filiale 1 zurück und vergleicht Prophet mit einer einfachen Wochen-Baseline. `MAE / mittlerer Ist-Umsatz` wird ausdrücklich als normalisierter MAE ausgewiesen, nicht als MAPE. Der geprüfte Lauf ergibt **615,69 Umsatzeinheiten MAE** für Prophet gegenüber **967,81** für die Wochen-Baseline, bewertet auf 26 Verkaufstagen. Das ist ein einzelnes Testfenster, kein allgemeiner Leistungsnachweis.
 
 ## Aufbau
 
 ```text
-app.py                              Interaktives Dashboard
-src/churn.py                        Datenbereinigung und logistische Regression
-src/forecasting.py                  Prophet-Prognose pro Filiale
-01_daten_vorbereitung.ipynb          Optional: Originaldaten auf drei Stores filtern
-Erste_Diagramm_erstellen.ipynb       Datenüberblick und Diagramme
-Chrun_prediction.ipynb              Churn-Modelle und Vergleich
-forecasting_mit_Prophet.ipynb        Prophet, zeitlicher Test und CSV-Export
-data/telco/                         Telco-Eingabedaten
-data/rossmann/                      Rossmann-Originaldaten, gefilterte Umsatzdaten und Prognoseexport
-.streamlit/config.toml              Darstellung des Dashboards
-requirements.txt                   Python-Abhängigkeiten
+app.py                         Streamlit-Oberfläche, Navigation und Caching
+src/churn.py                   CSV-Prüfung, Churn-Pipeline und Testkennzahlen
+src/forecasting.py             CSV-Prüfung, Filialdaten und Prophet-Prognose
+notebooks/                     Vier Analysen in nachvollziehbarer Reihenfolge
+tests/                         Daten-, Pipeline-, Forecast- und Oberflächentests
+scripts/run_notebooks.py       Notebook-Zellen in separaten Prozessen ausführen
+data/telco/                    Telco-Datensatz
+data/rossmann/                 Rossmann-Originaldaten, Teilmenge und Prognoseexport
+docs/images/                   Echte Dashboard-Screenshots und Ergebnisgrafiken
+.github/workflows/quality.yml  Automatische Prüfungen
 ```
 
-Die vier PNG-Dateien im Hauptordner zeigen die Churn-Verteilung, Kündigungen nach Vertragsart sowie Umsatzverteilung und Umsatzverlauf. Die bestehenden Notebook-Dateinamen wurden beibehalten.
+## Tests und Entwicklung
 
-## Notebooks nachvollziehen
+```powershell
+.venv\Scripts\python.exe -m pip install -r requirements-dev.txt
+.venv\Scripts\python.exe -m pytest -q
+.venv\Scripts\python.exe -m ruff check .
+.venv\Scripts\python.exe -m ruff format --check .
+```
 
-Unter Windows Jupyter mit `.venv\Scripts\python.exe -m notebook` starten, unter macOS/Linux mit `.venv/bin/python -m notebook`.
+Formatierung anwenden: `.venv\Scripts\python.exe -m ruff format .`.
 
-1. Optional `01_daten_vorbereitung.ipynb`: verwendet die im Repository enthaltene Rossmann-Originaldatei unter `data/rossmann/train.csv`. Mit dem mitgelieferten gefilterten Datensatz kann dieser Schritt übersprungen werden.
-2. `Erste_Diagramm_erstellen.ipynb`: Datenüberblick und vier Diagramme.
-3. `Chrun_prediction.ipynb`: logistische Regression, Random Forest und Modellvergleich.
-4. `forecasting_mit_Prophet.ipynb`: Prognose, Validierung für Store 1 und Export für alle drei Stores.
+Unter macOS/Linux entsprechend `.venv/bin/python` verwenden. GitHub Actions führt Tests, Linter, Formatprüfung und alle vier Notebook-Abläufe aus. Die Oberflächentests bedienen beide Seiten, Kundenauswahl, Filiale und Prognosehorizont.
 
-Jeweils den Kernel neu starten und alle Zellen von oben nach unten ausführen. Diagramme und `forecasts.csv` werden dabei neu geschrieben. Vorhandene Notebook-Ausgaben dokumentieren frühere Läufe und können von neu berechneten Ergebnissen abweichen.
+### Notebooks nachvollziehen
 
-## Methoden und vorhandene Ergebnisse
+```powershell
+.venv\Scripts\python.exe -m notebook
+```
 
-### Customer Churn
+1. [01_prepare_data.ipynb](notebooks/01_prepare_data.ipynb): Originaldaten auf Filialen 1–3 reduzieren; optional, die Teilmenge ist enthalten.
+2. [02_exploratory_analysis.ipynb](notebooks/02_exploratory_analysis.ipynb): Datentypen, fehlende Werte, Kündigungen und Umsatzverteilung.
+3. [03_churn_prediction.ipynb](notebooks/03_churn_prediction.ipynb): Klassifikation, Kennzahlen und Random-Forest-Vergleich.
+4. [04_sales_forecasting.ipynb](notebooks/04_sales_forecasting.ipynb): Prophet, zeitlicher Test, Wochen-Baseline und Export.
 
-`TotalCharges` enthält elf Leerwerte, die in Zahlen umgewandelt und durch den Median ersetzt werden. `customerID` ist kein Modellmerkmal. Kategorische Merkmale werden per One-Hot-Encoding umgewandelt. Es folgt ein stratifizierter 80/20-Train/Test-Split mit `random_state=42`. Die Skalierung wird nur am Trainingssatz angepasst.
+Kernel neu starten und Zellen von oben nach unten ausführen. Alternativ prüft `python scripts/run_notebooks.py` die Codezellen ohne Jupyter-Server in einem frischen Python-Prozess pro Notebook. Mit `--write` werden auch Notebook-Ausgaben gespeichert. Die Notebooks schreiben ihre dokumentierten CSV-Dateien und Grafiken neu; Prophet-Unsicherheitsintervalle können zwischen Läufen variieren.
 
-Das Dashboard verwendet logistische Regression. Das Notebook vergleicht zusätzlich einen Random Forest. Folgende Werte stammen aus den **gespeicherten Notebook-Ausgaben**:
+## Daten und Quellen
 
-| Kennzahl | Logistische Regression | Random Forest |
-|---|---:|---:|
-| Accuracy | 80,70 % | 78,64 % |
-| Precision | 65,84 % | 62,37 % |
-| Recall | 56,68 % | 49,20 % |
-| F1-Score | 60,92 % | 55,01 % |
-| ROC-AUC | 0,8416 | 0,8251 |
+| Datei | Umfang und Verwendung |
+|---|---|
+| `data/telco/WA_Fn-UseC_-Telco-Customer-Churn.csv` | 7.043 Kunden, 21 Spalten; 1.869 Kündigungen |
+| `data/rossmann/train.csv` | 1.017.209 Originalzeilen; optional für die Vorbereitung |
+| `data/rossmann/train_filtered.csv` | 2.826 Zeilen für Filialen 1–3, 01.01.2013–31.07.2015 |
+| `data/rossmann/forecasts.csv` | Beispiel-Export mit historischen Modellwerten und Zukunftsprognosen; wird vom Dashboard nicht eingelesen |
 
-Die logistische Regression schneidet in diesem gespeicherten Vergleich besser ab. Der Recall zeigt jedoch, dass viele tatsächliche Kündiger nicht erkannt werden. Eine Mehrheitsvorhersage „bleibt“ erreicht im gesamten Datensatz bereits rund 73,46 % Accuracy. Deshalb sind Recall, F1 und ROC-AUC zusätzlich wichtig.
+Die Datensätze sind im Repository enthalten. Quellen: [Telco Customer Churn](https://www.kaggle.com/datasets/blastchar/telco-customer-churn) und [Rossmann Store Sales](https://www.kaggle.com/competitions/rossmann-store-sales/data). Die Nutzungsbedingungen der jeweiligen Quellen gelten unabhängig vom Projektcode.
 
-### Umsatzprognose
+## Grenzen und nächste Schritte
 
-Prophet verwendet Trend, Wochen- und Jahressaisonalität. Trainiert wird je Store auf Tagen mit `Open == 1` und positivem Umsatz; insgesamt sind das 2.344 Zeilen. Der Prognosehorizont im Dashboard liegt zwischen 7 und 60 Kalendertagen. Sonntage werden für Zukunftstabelle und Kennzahlen ausgeblendet und negative Werte dort auf null begrenzt. Die Diagrammlinie enthält dagegen die unveränderten Modellwerte.
+- Historische Demonstration: Die Rossmann-Prognose beginnt nach dem Datenende **31.07.2015**, nicht nach dem heutigen Datum. Die CSV weist keine Währung aus.
+- Prophet lernt nur aus geöffneten Tagen mit positivem Umsatz. Sonntage werden in Zukunftstabelle und Kennzahlen ausgeblendet; weitere Schließtage, Feiertage und Aktionen werden noch nicht modelliert. Die Summe ist keine vollständige Kalender-Umsatzplanung.
+- Churn: ein einzelner Testsplit, keine Kreuzvalidierung oder Wahrscheinlichkeitskalibrierung. Koeffizienten zeigen Modellzusammenhänge, keine Kausalität.
+- Forecast: zeitlicher Test bisher nur für eine Filiale und ein Fenster; weitere Backtests stehen aus.
+- Direkte Abhängigkeiten sind festgelegt; ein vollständiger Lock aller indirekten Pakete fehlt. Geprüft wurde Python 3.12.14 auf Linux; Windows/macOS wurden hier nicht ausgeführt.
 
-Das Notebook hält für Store 1 die letzten 30 Kalendertage zurück und bewertet die darin enthaltenen geöffneten Tage. Gespeichertes Ergebnis: **MAE rund 616 Umsatzeinheiten je bewertetem Tag**. Die ausgegebenen **13,8 %** sind `MAE / mittlerer tatsächlicher Umsatz`, also ein normalisierter MAE und **kein MAPE**. Das Dashboard trainiert anschließend auf der gesamten vorhandenen Historie. Es lädt den gespeicherten Prognoseexport nicht ein.
+Die nächsten Schritte stehen in [ROADMAP.md](ROADMAP.md). Für den Projektcode ist derzeit keine ausdrückliche Open-Source-Lizenz festgelegt.
 
-## Grenzen und nächste Verbesserungen
+## Lernziele
 
-- Der Median für `TotalCharges` und die Kategorien des Encodings werden derzeit vor dem Split bestimmt. Für eine methodisch saubere Evaluation sollten Imputation und Encoding in eine ausschließlich auf Trainingsdaten angepasste Pipeline verschoben werden.
-- Churn-Ergebnisse beruhen auf einem einzelnen Split. Eine Kreuzvalidierung auf den Trainingsdaten, ein unangetasteter Abschlusstest und eine begründete Entscheidungsschwelle fehlen.
-- Koeffizienten zeigen Zusammenhänge im Modell, keine kausalen Einflüsse. Die Risikostufen 30/60 % sind Darstellungsgrenzen; der Klassifikator verwendet standardmäßig 50 %. Eine Kalibrierung wurde nicht nachgewiesen.
-- Der Prophet-Test umfasst nur Store 1 und ein Zeitfenster. Ein Vergleich mit einer einfachen Wochenprognose und mehrere zeitliche Testfenster für alle drei Stores fehlen.
-- Aktionen, Feiertage und zusätzliche Schließtage werden nicht als Prädiktoren berücksichtigt. Die Prognosesumme ist deshalb keine belastbare vollständige Kalender-Umsatzplanung.
-- Es handelt sich um ein Lernprojekt; ein nachgewiesener finanzieller Nutzen oder ein Einsatz mit aktuellen Kundendaten ist nicht Bestandteil dieser Arbeit.
-
-## Was gehört ins Repository?
-
-Code, Notebooks, die gezielt ausgewählten CSV-Dateien und Ergebnisgrafiken bleiben für die Prüfung enthalten. Jupyter-Checkpoints, Python-Caches, virtuelle Umgebungen und Zugangsdaten werden ignoriert.
-
-## Technische Prüfung am 16.10.2026
-
-Die Paketinstallation und die Abhängigkeitsprüfung waren unter Python 3.12.10 erfolgreich. Churn-Training und Kennzahlen wurden reproduziert, die Codezellen des Diagramm- und Churn-Notebooks vollständig ausgeführt und die Churn-Seite einschließlich Kundenauswahl mit Streamlits AppTest geprüft. Die vier Notebook-Strukturen und die Python-Syntax sind gültig.
+Daten prüfen und bereinigen, Training und Test sauber trennen, Modelle mit einfachen Baselines vergleichen, Ergebnisse verständlich darstellen und die Anwendung mit Tests und Versionsverwaltung weiterentwickeln.

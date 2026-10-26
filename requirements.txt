@@ -1,9 +1,10 @@
-pandas
-numpy
-matplotlib
-seaborn
-scikit-learn
-jupyter
-prophet
-streamlit>=1.50
-plotly
+# Direkte Abhängigkeiten, unter Python 3.12 auf Linux geprüft.
+pandas==2.2.3
+numpy==2.3.5
+matplotlib==3.10.8
+seaborn==0.13.2
+scikit-learn==1.8.0
+jupyter==1.1.1
+prophet==1.5.0
+streamlit==1.66.1
+plotly==7.1.0

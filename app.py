@@ -5,6 +5,8 @@ Streamlit führt dieses Skript bei jeder Interaktion von oben nach unten neu
 aus. Teure Berechnungen merken wir uns deshalb mit Caching.
 """
 
+import logging
+
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
@@ -50,9 +52,12 @@ def kpi(col, label, value, sub="", color=BLUE):
 def style(fig, height=380):
     """Einheitliches Aussehen für alle Plotly-Diagramme."""
     fig.update_layout(
-        height=height, margin=dict(l=10, r=10, t=40, b=10),
-        paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
-        legend=dict(orientation="h", y=1.1, x=0),
+        height=height,
+        margin=dict(l=10, r=10, t=80, b=10),
+        paper_bgcolor="rgba(0,0,0,0)",
+        plot_bgcolor="rgba(0,0,0,0)",
+        legend=dict(orientation="h", y=1.02, x=0),
+        title=dict(y=0.98, x=0.01),
     )
     fig.update_xaxes(showgrid=False)
     fig.update_yaxes(gridcolor="#E3E8EF")
@@ -92,14 +97,20 @@ def get_forecast(store_id, days):
 # Seite 1: Customer Churn
 # ---------------------------------------------------------------------------
 def page_churn():
-    st.title("📉 Customer Churn")
+    st.title("Customer Churn")
     st.markdown(
-        "Welche Telekommunikationskunden kündigen bald? Ein Logistic-Regression-"
-        "Modell schätzt für jeden Kunden die **Kündigungswahrscheinlichkeit**."
+        "Ein Modell mit logistischer Regression schätzt auf historischen Beispieldaten "
+        "den **Churn-Score** eines Kunden. Es gibt keinen festgelegten Zeitrahmen "
+        "für eine zukünftige Kündigung."
     )
     df = get_churn_data()
     res = get_churn_result()
     m = res["metrics"]
+    st.caption(
+        f"Testdaten: {len(res['y_test']):,} Kunden · "
+        f"Mehrheits-Baseline: {res['baseline_accuracy']:.1%} Accuracy · "
+        "Modell-Scores sind nicht nachweislich kalibriert."
+    )
 
     # --- KPI-Karten ---
     c = st.columns(5)
@@ -110,7 +121,7 @@ def page_churn():
     kpi(c[4], "ROC-AUC", f"{m['ROC-AUC']:.2f}", "Trennschärfe (1 = perfekt)", BLUE)
     st.write("")
 
-    tab1, tab2, tab3 = st.tabs(["🔍 Übersicht", "👤 Kundenprognose", "🧪 Modell"])
+    tab1, tab2, tab3 = st.tabs(["Übersicht", "Kundenprognose", "Modell"])
 
     # --- Tab 1: Übersicht ---
     with tab1:
@@ -118,18 +129,30 @@ def page_churn():
         d = df.assign(Status=df["Churn"].map({1: "Gekündigt", 0: "Geblieben"}))
         left, right = st.columns(2)
 
-        fig = px.pie(d, names="Status", hole=0.55, color="Status",
-                     color_discrete_map=STATUS_COLORS, title="Gekündigt vs. geblieben")
+        fig = px.pie(
+            d,
+            names="Status",
+            hole=0.55,
+            color="Status",
+            color_discrete_map=STATUS_COLORS,
+            title="Gekündigt vs. geblieben",
+        )
         left.plotly_chart(style(fig), width="stretch")
 
-        fig = px.histogram(d, x="Contract", color="Status", barmode="group",
-                           color_discrete_map=STATUS_COLORS,
-                           category_orders={"Contract": ["Month-to-month", "One year", "Two year"]},
-                           labels={"Contract": "Vertragsart", "count": "Anzahl Kunden"},
-                           title="Kündigungen nach Vertragsart")
+        fig = px.histogram(
+            d,
+            x="Contract",
+            color="Status",
+            barmode="group",
+            color_discrete_map=STATUS_COLORS,
+            category_orders={"Contract": ["Month-to-month", "One year", "Two year"]},
+            labels={"Contract": "Vertragsart", "count": "Anzahl Kunden"},
+            title="Kündigungen nach Vertragsart",
+        )
         right.plotly_chart(style(fig), width="stretch")
-        st.info("Kunden mit Monatsvertrag kündigen deutlich häufiger als Kunden mit "
-                "Jahresverträgen.")
+        st.info(
+            "Kunden mit Monatsvertrag kündigen deutlich häufiger als Kunden mit Jahresverträgen."
+        )
 
     # --- Tab 2: Einzelner Kunde ---
     with tab2:
@@ -139,29 +162,44 @@ def page_churn():
         p = float(res["proba"].loc[idx])
         actual = "hat gekündigt" if res["y_test"].loc[idx] == 1 else "ist geblieben"
 
-        gauge = go.Figure(go.Indicator(
-            mode="gauge+number", value=p * 100,
-            number={"suffix": " %", "valueformat": ".1f"},
-            title={"text": "Kündigungswahrscheinlichkeit"},
-            gauge={"axis": {"range": [0, 100]}, "bar": {"color": "#1B2430"},
-                   "steps": [{"range": [0, 30], "color": "#B7E4C7"},
-                             {"range": [30, 60], "color": "#FFE8A3"},
-                             {"range": [60, 100], "color": "#F5B7B1"}]},
-        ))
+        gauge = go.Figure(
+            go.Indicator(
+                mode="gauge+number",
+                value=p * 100,
+                number={"suffix": " %", "valueformat": ".1f"},
+                title={"text": "Modell-Score für Kündigung"},
+                gauge={
+                    "axis": {"range": [0, 100]},
+                    "bar": {"color": "#1B2430"},
+                    "steps": [
+                        {"range": [0, 30], "color": "#B7E4C7"},
+                        {"range": [30, 60], "color": "#FFE8A3"},
+                        {"range": [60, 100], "color": "#F5B7B1"},
+                    ],
+                },
+            )
+        )
         left, right = st.columns([2, 1])
         left.plotly_chart(style(gauge, 300), width="stretch")
         right.metric("Tatsächlich", actual)
         risiko = "hoch" if p >= 0.6 else "mittel" if p >= 0.3 else "niedrig"
         right.metric("Risiko", risiko)
+        st.caption(
+            "Die Risikogrenzen 30 % und 60 % dienen der Darstellung. "
+            "Die binäre Modellvorhersage verwendet 50 %."
+        )
 
         # Download aller Testkunden mit Vorhersage
-        out = pd.DataFrame({
-            "customerID": res["ids"],
-            "Kuendigungswahrscheinlichkeit": res["proba"].round(4),
-            "Tatsaechlich_gekuendigt": res["y_test"],
-        }).sort_values("Kuendigungswahrscheinlichkeit", ascending=False)
-        st.download_button("⬇️ Alle Vorhersagen als CSV", to_csv(out),
-                           "churn_vorhersagen.csv", "text/csv")
+        out = pd.DataFrame(
+            {
+                "customerID": res["ids"],
+                "Kuendigungswahrscheinlichkeit": res["proba"].round(4),
+                "Tatsaechlich_gekuendigt": res["y_test"],
+            }
+        ).sort_values("Kuendigungswahrscheinlichkeit", ascending=False)
+        st.download_button(
+            "Alle Vorhersagen als CSV", to_csv(out), "churn_vorhersagen.csv", "text/csv"
+        )
 
     # --- Tab 3: Modellbewertung ---
     with tab3:
@@ -169,20 +207,32 @@ def page_churn():
 
         left.subheader("Confusion Matrix")
         left.caption("Zeilen = Realität, Spalten = Vorhersage.")
-        fig = px.imshow(res["cm"], text_auto=True, color_continuous_scale="Blues",
-                        x=["Bleibt", "Kündigt"], y=["Bleibt", "Kündigt"],
-                        labels=dict(x="Vorhersage", y="Realität"))
+        fig = px.imshow(
+            res["cm"],
+            text_auto=True,
+            color_continuous_scale="Blues",
+            x=["Bleibt", "Kündigt"],
+            y=["Bleibt", "Kündigt"],
+            labels=dict(x="Vorhersage", y="Realität"),
+        )
         fig.update_coloraxes(showscale=False)
         left.plotly_chart(style(fig, 400), width="stretch")
 
-        right.subheader("Wichtigste Einflussfaktoren")
-        right.caption("Rot = erhöht das Kündigungsrisiko, grün = senkt es.")
+        right.subheader("Zusammenhänge im Modell")
+        right.caption(
+            "Rot = positiver, grün = negativer Koeffizient. "
+            "Das belegt keine Ursache für Kündigungen."
+        )
         coefs = res["coefs"]
         top = pd.concat([coefs.head(8), coefs.tail(8)]).sort_values()
-        fig = px.bar(x=top.values, y=top.index, orientation="h",
-                     color=top.values > 0,
-                     color_discrete_map={True: RED, False: GREEN},
-                     labels={"x": "Koeffizient (skalierte Features)", "y": ""})
+        fig = px.bar(
+            x=top.values,
+            y=top.index,
+            orientation="h",
+            color=top.values > 0,
+            color_discrete_map={True: RED, False: GREEN},
+            labels={"x": "Koeffizient (skalierte Features)", "y": ""},
+        )
         fig.update_layout(showlegend=False)
         right.plotly_chart(style(fig, 400), width="stretch")
 
@@ -194,10 +244,10 @@ def page_churn():
 # Seite 2: Forecast
 # ---------------------------------------------------------------------------
 def page_forecast():
-    st.title("📈 Umsatzprognose (Rossmann)")
+    st.title("Umsatzprognose (Rossmann)")
     st.markdown(
         "Das Zeitreihenmodell **Prophet** lernt Trend sowie Wochen- und "
-        "Jahresmuster der Tagesumsätze und sagt die kommenden Tage voraus."
+        "Jahresmuster der Tagesumsätze. Die Prognose folgt auf den historischen Datenstand."
     )
     sales = get_sales()
 
@@ -211,9 +261,17 @@ def page_forecast():
 
     hist = sales[sales["Store"] == store]
     last_hist = hist["Date"].max()
+    st.caption(
+        f"Letzter Datenstand: {last_hist:%d.%m.%Y}. Historische Demonstration; "
+        "die Vorhersage beschreibt geöffnete Verkaufstage. "
+        "Eine Währung ist in der CSV nicht ausgewiesen."
+    )
     future = fc[(fc["ds"] > last_hist) & (fc["ds"].dt.dayofweek != 6)].copy()  # ohne Sonntage
     for col in ["yhat", "yhat_lower", "yhat_upper"]:
         future[col] = future[col].clip(lower=0)
+    if future.empty:
+        st.info("Für diesen Zeitraum sind keine Verkaufstage verfügbar.")
+        return
 
     # --- KPI-Karten ---
     best = future.loc[future["yhat"].idxmax()]
@@ -221,21 +279,34 @@ def page_forecast():
     avg_fc = future["yhat"].mean()
     delta = avg_fc / last30 - 1
     c = st.columns(4)
-    kpi(c[0], "Ø Tagesumsatz (Prognose)", f"{avg_fc:,.0f} €".replace(",", "."),
-        f"{delta:+.1%} zu letzten 30 Tagen", GREEN if delta >= 0 else RED)
-    kpi(c[1], "Summe Prognose", f"{future['yhat'].sum():,.0f} €".replace(",", "."),
-        f"nächste {days} Tage", BLUE)
-    kpi(c[2], "Stärkster Tag", f"{best['yhat']:,.0f} €".replace(",", "."),
-        best["ds"].strftime("%a, %d.%m.%Y"), ORANGE)
-    kpi(c[3], "Ø letzte 30 Tage", f"{last30:,.0f} €".replace(",", "."),
-        "tatsächlicher Umsatz", GRAY)
+    kpi(
+        c[0],
+        "Ø Tagesumsatz (Prognose)",
+        f"{avg_fc:,.0f}".replace(",", "."),
+        f"{delta:+.1%} zu letzten 30 Tagen",
+        GREEN if delta >= 0 else RED,
+    )
+    kpi(
+        c[1],
+        "Summe Verkaufstage",
+        f"{future['yhat'].sum():,.0f}".replace(",", "."),
+        f"ohne Sonntage im {days}-Tage-Horizont",
+        BLUE,
+    )
+    kpi(
+        c[2],
+        "Stärkster Tag",
+        f"{best['yhat']:,.0f}".replace(",", "."),
+        best["ds"].strftime("%a, %d.%m.%Y"),
+        ORANGE,
+    )
+    kpi(c[3], "Ø letzte 30 Tage", f"{last30:,.0f}".replace(",", "."), "tatsächlicher Umsatz", GRAY)
     st.write("")
 
     # --- Zeitraum wählen ---
     min_d, max_d = hist["Date"].min().date(), fc["ds"].max().date()
     default_start = max(min_d, (last_hist - pd.Timedelta(days=120)).date())
-    rng = st.date_input("Zeitraum", value=(default_start, max_d),
-                        min_value=min_d, max_value=max_d)
+    rng = st.date_input("Zeitraum", value=(default_start, max_d), min_value=min_d, max_value=max_d)
     if len(rng) != 2:
         st.info("Bitte Start- und Enddatum wählen.")
         return
@@ -245,45 +316,105 @@ def page_forecast():
 
     # --- Diagramm: Historie (Punkte) + Prognose (Linie + Band) ---
     fig = go.Figure()
-    fig.add_trace(go.Scatter(x=f["ds"], y=f["yhat_upper"], mode="lines",
-                             line=dict(width=0), hoverinfo="skip", showlegend=False))
-    fig.add_trace(go.Scatter(x=f["ds"], y=f["yhat_lower"], mode="lines",
-                             line=dict(width=0), fill="tonexty",
-                             fillcolor="rgba(31,111,235,0.15)", name="Unsicherheit",
-                             hoverinfo="skip"))
-    fig.add_trace(go.Scatter(x=f["ds"], y=f["yhat"], mode="lines",
-                             line=dict(color=BLUE, width=2.5), name="Prognose"))
-    fig.add_trace(go.Scatter(x=h["Date"], y=h["Sales"], mode="markers",
-                             marker=dict(color="#1B2430", size=5), name="Historisch"))
-    fig.add_shape(type="line", x0=last_hist, x1=last_hist, y0=0, y1=1,
-                  yref="paper", line=dict(dash="dash", color=GRAY))
-    fig.add_annotation(x=last_hist, y=1, yref="paper", text="Heute", showarrow=False,
-                       xanchor="left", font=dict(color=GRAY))
-    fig.update_layout(yaxis_title="Umsatz (€)", hovermode="x unified")
+    fig.add_trace(
+        go.Scatter(
+            x=f["ds"],
+            y=f["yhat_upper"],
+            mode="lines",
+            line=dict(width=0),
+            hoverinfo="skip",
+            showlegend=False,
+        )
+    )
+    fig.add_trace(
+        go.Scatter(
+            x=f["ds"],
+            y=f["yhat_lower"],
+            mode="lines",
+            line=dict(width=0),
+            fill="tonexty",
+            fillcolor="rgba(31,111,235,0.15)",
+            name="Unsicherheit",
+            hoverinfo="skip",
+        )
+    )
+    fig.add_trace(
+        go.Scatter(
+            x=f["ds"], y=f["yhat"], mode="lines", line=dict(color=BLUE, width=2.5), name="Prognose"
+        )
+    )
+    fig.add_trace(
+        go.Scatter(
+            x=h["Date"],
+            y=h["Sales"],
+            mode="markers",
+            marker=dict(color="#1B2430", size=5),
+            name="Historisch",
+        )
+    )
+    fig.add_shape(
+        type="line",
+        x0=last_hist,
+        x1=last_hist,
+        y0=0,
+        y1=1,
+        yref="paper",
+        line=dict(dash="dash", color=GRAY),
+    )
+    fig.add_annotation(
+        x=last_hist,
+        y=1,
+        yref="paper",
+        text="Letzter Datenstand",
+        showarrow=False,
+        xanchor="left",
+        font=dict(color=GRAY),
+    )
+    fig.update_layout(yaxis_title="Umsatzeinheiten", hovermode="x unified")
     st.plotly_chart(style(fig, 450), width="stretch")
 
     # --- Tabelle + Download ---
     st.subheader("Prognose der nächsten Tage")
-    st.caption("Sonntage sind ausgeblendet, da die Läden geschlossen sind.")
-    table = future[["ds", "yhat", "yhat_lower", "yhat_upper"]].round(0).rename(columns={
-        "ds": "Datum", "yhat": "Prognose (€)",
-        "yhat_lower": "Untergrenze (€)", "yhat_upper": "Obergrenze (€)"})
+    st.caption(
+        "Sonntage sind ausgeblendet; weitere Schließtage und Feiertage werden nicht "
+        "modelliert. Tabelle und Kennzahlen begrenzen negative Werte auf null; "
+        "die Diagrammlinie zeigt unveränderte Modellwerte."
+    )
+    table = (
+        future[["ds", "yhat", "yhat_lower", "yhat_upper"]]
+        .round(0)
+        .rename(
+            columns={
+                "ds": "Datum",
+                "yhat": "Prognose",
+                "yhat_lower": "Untergrenze",
+                "yhat_upper": "Obergrenze",
+            }
+        )
+    )
     table["Datum"] = table["Datum"].dt.date
     st.dataframe(table, width="stretch", hide_index=True)
-    st.download_button("⬇️ Prognose als CSV", to_csv(table),
-                       f"prognose_store_{store}_{days}tage.csv", "text/csv")
+    st.download_button(
+        "Prognose als CSV", to_csv(table), f"prognose_store_{store}_{days}tage.csv", "text/csv"
+    )
 
 
 # ---------------------------------------------------------------------------
 # Sidebar-Navigation
 # ---------------------------------------------------------------------------
-st.sidebar.title("📊 Churn & Forecast")
-page = st.sidebar.radio("Seite", ["📉 Customer Churn", "📈 Forecast"],
-                        label_visibility="collapsed")
+st.sidebar.title("Churn & Forecast")
+page = st.sidebar.radio("Seite", ["Customer Churn", "Forecast"], label_visibility="collapsed")
 st.sidebar.caption("Datenquellen: Telco Customer Churn, Rossmann Store Sales")
 st.sidebar.divider()
 
-if page.endswith("Customer Churn"):
-    page_churn()
-else:
-    page_forecast()
+try:
+    if page.endswith("Customer Churn"):
+        page_churn()
+    else:
+        page_forecast()
+except (OSError, ValueError) as error:
+    logging.exception("Dashboard konnte Daten nicht verarbeiten")
+    st.error(f"Daten konnten nicht verarbeitet werden: {error}")
+    st.info(
+        "Bitte prüfe die CSV-Dateien und Pflichtspalten unter data/. Details stehen im Terminal."
+    )
